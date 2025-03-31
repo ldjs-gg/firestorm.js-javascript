@@ -10,13 +10,13 @@
 
 'use client'
 
-import { Button } from "@/components/ui/button";
+import { Button } from "../../../components/ui/button";
 import StandardPanel from "./_components/standardPanel";
 import PremiumPanel from "./_components/premiumPanel";
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { initFirebase } from "@/firebase";
+import { initFirebase } from "../../../firebase";
 import { getAuth } from "firebase/auth";
 import { getCheckoutUrl, getPortalUrl } from "./_functions/stripePayment";
 import { getPremiumStatus } from "./_functions/getPremiumStatus";

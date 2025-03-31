@@ -12,7 +12,7 @@
 
 'use client'
 
-import { initFirebase } from "@/firebase";
+import { initFirebase } from "../../../../firebase";
 import { getAuth } from "firebase/auth";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -21,7 +21,7 @@ import ComponentButton from "./_components/component-button";
 import Tooltip from "./_components/tooltip";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Button } from "@/components/ui/button";
+import { Button } from "../../../../components/ui/button";
 
 /**
  * Header Component

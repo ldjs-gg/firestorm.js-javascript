@@ -9,7 +9,7 @@
 
 'use client'
 
-import { initFirebase } from "@/firebase";
+import { initFirebase } from "../../../firebase";
 import { getAuth } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

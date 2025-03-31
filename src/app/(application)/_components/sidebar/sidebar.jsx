@@ -15,12 +15,12 @@
 import ComponentButton from "../sidebar/_components/component-button";
 import Logo from "./_components/logo";
 import Image from "next/image";
-import { initFirebase } from "@/firebase";
+import { initFirebase } from "../../../../firebase";
 import { getAuth } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { getPremiumStatus } from "@/app/(application)/account/_functions/getPremiumStatus";
 import { getCheckoutUrl } from "@/app/(application)/account/_functions/stripePayment";
-import { Button } from "@/components/ui/button";
+import { Button } from "../../../../components/ui/button";
 import Tooltip from "./_components/tooltip";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";

@@ -10,14 +10,14 @@
  * - Dark mode support
  */
 
-import { Button } from "@/components/ui/button";
+import { Button } from "../../../../../components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { initFirebase } from "@/firebase";
+import { initFirebase } from "../../../../../firebase";
 import { getAuth } from "firebase/auth";
 import Image from "next/image";
 import { useState } from "react";

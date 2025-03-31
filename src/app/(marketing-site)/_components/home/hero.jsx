@@ -1,8 +1,8 @@
 'use client'
 
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { initFirebase } from "@/firebase";
+import { Button } from "../../../../components/ui/button";
+import { initFirebase } from "../../../../firebase";
 import { useRouter } from "next/navigation";
 import { 
   getAuth, 
@@ -58,7 +58,7 @@ export default function Hero() {
             className="dark:invert" 
           />
           <Image 
-            src="/technologies/typescript.svg" 
+            src="/technologies/javascript.svg" 
             alt="Firebase Logo" 
             width={16} 
             height={16} 

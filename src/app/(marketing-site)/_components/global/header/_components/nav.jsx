@@ -11,8 +11,8 @@
 
 'use client'
 
-import { Button } from "@/components/ui/button";
-import { initFirebase } from "@/firebase";
+import { Button } from "../../../../../../components/ui/button";
+import { initFirebase } from "../../../../../../firebase";
 import { useRouter } from "next/navigation";
 import { 
   getAuth, 
@@ -20,7 +20,7 @@ import {
   signInWithPopup,
   onAuthStateChanged
 } from "firebase/auth";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggle } from "../../../../../../components/theme-toggle";
 import { useEffect, useState } from "react";
 
 /**

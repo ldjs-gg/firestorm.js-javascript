@@ -9,7 +9,7 @@
 "use client"
 
 import * as React from "react"
-import { Button } from "@/components/ui/button"
+import { Button } from "./ui/button"
 import Image from "next/image"
 
 /**

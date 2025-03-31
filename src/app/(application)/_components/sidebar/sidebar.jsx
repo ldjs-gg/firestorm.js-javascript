@@ -1,0 +1,311 @@
+/**
+ * Application Sidebar Component
+ * 
+ * A client-side component that provides the main navigation sidebar for the application.
+ * Features include:
+ * - Collapsible sidebar with mobile support
+ * - Premium feature access control
+ * - User profile management
+ * - Theme toggle integration
+ * - Responsive design with mobile menu
+ */
+
+'use client'
+
+import ComponentButton from "../sidebar/_components/component-button";
+import Logo from "./_components/logo";
+import Image from "next/image";
+import { initFirebase } from "@/firebase";
+import { getAuth } from "firebase/auth";
+import { useEffect, useState } from "react";
+import { getPremiumStatus } from "@/app/(application)/account/_functions/getPremiumStatus";
+import { getCheckoutUrl } from "@/app/(application)/account/_functions/stripePayment";
+import { Button } from "@/components/ui/button";
+import Tooltip from "./_components/tooltip";
+import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
+import { SidebarThemeToggle } from "@/components/sidebar-theme-toggle";
+
+/**
+ * Sidebar Component
+ * 
+ * The main navigation sidebar for the application that provides:
+ * - Collapsible navigation with mobile support
+ * - Premium feature access control
+ * - User profile management
+ * - Theme toggle integration
+ * - Responsive design with mobile menu
+ * 
+ * @param {Object} props - Component props
+ * @param {Function} [props.onCollapse] - Callback function when sidebar collapse state changes
+ * @param {boolean} [props.isMobileMenuOpen] - Whether the mobile menu is currently open
+ * @param {Function} [props.onCloseMobileMenu] - Function to close the mobile menu
+ * @returns {JSX.Element} The sidebar component
+ */
+export default function Sidebar({ onCollapse, isMobileMenuOpen, onCloseMobileMenu }) {
+  // Initialize Firebase and get auth instance
+  const app = initFirebase();
+  const auth = getAuth(app);
+  const router = useRouter();
+  const { theme, setTheme } = useTheme();
+  
+  // State management
+  const [user, setUser] = useState(auth.currentUser);
+  const [isPremium, setIsPremium] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  /**
+   * Window resize handler
+   * Updates mobile state based on window width
+   */
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  /**
+   * Authentication state change handler
+   * Updates user state and checks premium status
+   */
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
+      if (user) {
+        checkPremiumStatus();
+      }
+    });
+
+    return () => unsubscribe();
+  }, [auth]);
+
+  /**
+   * Collapse state change handler
+   * Notifies parent component of collapse state changes
+   */
+  useEffect(() => {
+    onCollapse?.(isCollapsed);
+  }, [isCollapsed, onCollapse]);
+
+  /**
+   * Mobile menu state handler
+   * Resets collapse state when mobile menu is closed
+   */
+  useEffect(() => {
+    if (!isMobileMenuOpen) {
+      setIsCollapsed(false);
+    }
+  }, [isMobileMenuOpen]);
+
+  /**
+   * Checks the user's premium subscription status
+   */
+  const checkPremiumStatus = async () => {
+    try {
+      const status = await getPremiumStatus(app);
+      setIsPremium(status);
+    } catch (error) {
+      console.error("Error checking premium status:", error);
+    }
+  };
+
+  /**
+   * Handles the upgrade to premium process
+   * Redirects to Stripe checkout
+   */
+  const upgradeToPremium = async() => {
+    try {
+      setIsLoading(true);
+      const priceId = "price_1R6OLJCmqCvukeXKizvocThA";
+      const checkoutUrl = await getCheckoutUrl(app, priceId);
+      router.push(checkoutUrl);
+    } catch (error) {
+      console.error("Failed to get checkout URL:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className={`h-screen flex flex-col border-r-[1px] border-border transition-all duration-300 bg-background ${isCollapsed && !isMobile ? 'w-[80px]' : 'w-[248px]'} relative`}>
+      {/* Top section with logo and collapse button */}
+      <div className="flex flex-col gap-4 p-4">
+        <div className="w-full flex items-center justify-between">
+          <Logo isCollapsed={isCollapsed && !isMobile} />
+          {/* Desktop Collapse Button */}
+          <div 
+            className="cursor-pointer p-1 bg-background rounded-full border-[1px] border-border absolute top-4 -right-[14px] hover:bg-accent transition-colors md:block hidden"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+          >
+            <Image 
+              src="/icons/arrow-left.svg" 
+              alt="Close Icon" 
+              width={20} 
+              height={20} 
+              className={`transition-transform duration-300 dark:invert ${isCollapsed ? 'rotate-180' : ''}`}
+            />
+          </div>
+        </div>
+        <div className="w-[calc(100%+32px)] border-b border-border -ml-4"></div>
+        <ComponentButton isCollapsed={isCollapsed && !isMobile} />
+        
+        {/* Navigation items */}
+        <div className="flex flex-col gap-2">
+          {(!isCollapsed || isMobile) && <p className="text-xs text-muted-foreground">Features</p>}
+          
+          {/* Dashboard link */}
+          {isCollapsed && !isMobile ? (
+            <Tooltip text="Dashboard" position="right">
+              <div className="flex items-center justify-center gap-2 w-full hover:bg-accent p-2 rounded-md cursor-pointer" onClick={() => {
+                router.push('/dashboard');
+                if (isMobile && isMobileMenuOpen) {
+                  onCloseMobileMenu?.();
+                }
+              }}>
+                <Image src="/icons/dashboard.svg" alt="Dashboard Icon" width={20} height={20} className="dark:invert" />
+              </div>
+            </Tooltip>
+          ) : (
+            <div className="flex items-center gap-2 w-full hover:bg-accent p-2 rounded-md cursor-pointer" onClick={() => {
+              router.push('/dashboard');
+              if (isMobile && isMobileMenuOpen) {
+                onCloseMobileMenu?.();
+              }
+            }}>
+              <Image src="/icons/dashboard.svg" alt="Dashboard Icon" width={20} height={20} className="dark:invert" />
+              <p className="text-xs">Dashboard</p>
+            </div>
+          )}
+
+          {/* Free Feature link */}
+          {isCollapsed && !isMobile ? (
+            <Tooltip text="Free Feature" position="right">
+              <div className="flex items-center justify-center gap-2 w-full hover:bg-accent p-2 rounded-md cursor-pointer" onClick={() => {
+                router.push('/free-feature');
+                if (isMobile && isMobileMenuOpen) {
+                  onCloseMobileMenu?.();
+                }
+              }}>
+                <Image src="/icons/book.svg" alt="Book Icon" width={20} height={20} className="dark:invert" />
+              </div>
+            </Tooltip>
+          ) : (
+            <div className="flex items-center gap-2 w-full hover:bg-accent p-2 rounded-md cursor-pointer" onClick={() => {
+              router.push('/free-feature');
+              if (isMobile && isMobileMenuOpen) {
+                onCloseMobileMenu?.();
+              }
+            }}>
+              <Image src="/icons/book.svg" alt="Book Icon" width={20} height={20} className="dark:invert" />
+              <p className="text-xs">Free Feature</p>
+            </div>
+          )}
+
+          {/* Premium Feature A link */}
+          {isCollapsed && !isMobile ? (
+            <Tooltip text="Premium Feature" position="right">
+              <div className={`flex items-center justify-center gap-2 w-full p-2 rounded-md ${isPremium ? 'hover:bg-accent cursor-pointer' : 'cursor-default opacity-50'}`} onClick={() => {
+                if (isPremium) {
+                  router.push('/premium-feature-a');
+                  if (isMobile && isMobileMenuOpen) {
+                    onCloseMobileMenu?.();
+                  }
+                }
+              }}>
+                <Image src="/icons/analytics.svg" alt="Analytics Icon" width={20} height={20} className="dark:invert" />
+              </div>
+            </Tooltip>
+          ) : (
+            <div className={`flex items-center gap-2 w-full p-2 rounded-md ${isPremium ? 'hover:bg-accent cursor-pointer' : 'cursor-default opacity-50'}`} onClick={() => {
+              if (isPremium) {
+                router.push('/premium-feature-a');
+                if (isMobile && isMobileMenuOpen) {
+                  onCloseMobileMenu?.();
+                }
+              }
+            }}>
+              <Image src="/icons/analytics.svg" alt="Analytics Icon" width={20} height={20} className="dark:invert" />
+              <p className="text-xs">Premium Feature</p>
+            </div>
+          )}
+
+          {/* Premium Feature B link */}
+          {isCollapsed && !isMobile ? (
+            <Tooltip text="Premium Feature" position="right">
+              <div className={`flex items-center justify-center gap-2 w-full p-2 rounded-md ${isPremium ? 'hover:bg-accent cursor-pointer' : 'cursor-default opacity-50'}`} onClick={() => {
+                if (isPremium) {
+                  router.push('/premium-feature-b');
+                  if (isMobile && isMobileMenuOpen) {
+                    onCloseMobileMenu?.();
+                  }
+                }
+              }}>
+                <Image src="/icons/analytics.svg" alt="Analytics Icon" width={20} height={20} className="dark:invert" />
+              </div>
+            </Tooltip>
+          ) : (
+            <div className={`flex items-center gap-2 w-full p-2 rounded-md ${isPremium ? 'hover:bg-accent cursor-pointer' : 'cursor-default opacity-50'}`} onClick={() => {
+              if (isPremium) {
+                router.push('/premium-feature-b');
+                if (isMobile && isMobileMenuOpen) {
+                  onCloseMobileMenu?.();
+                }
+              }
+            }}>
+              <Image src="/icons/analytics.svg" alt="Analytics Icon" width={20} height={20} className="dark:invert" />
+              <p className="text-xs">Premium Feature</p>
+            </div>
+          )}
+        </div>
+
+        {/* Bottom section with theme toggle and user profile */}
+        <div className="mt-auto flex flex-col gap-4">
+          <div className="w-[calc(100%+32px)] border-t border-border -ml-4"></div>
+          
+          {/* Theme toggle */}
+          <div className="flex items-center gap-2">
+            <SidebarThemeToggle />
+            {(!isCollapsed || isMobile) && <p className="text-xs">Theme</p>}
+          </div>
+
+          {/* User profile section */}
+          <div className="flex items-center gap-2">
+            <div className="relative w-8 h-8 rounded-full overflow-hidden">
+              <Image 
+                src={user?.photoURL || "/images/default-avatar.png"} 
+                alt="User Avatar" 
+                fill 
+                className="object-cover"
+              />
+            </div>
+            {(!isCollapsed || isMobile) && (
+              <div className="flex flex-col">
+                <p className="text-xs font-medium">{user?.displayName}</p>
+                <p className="text-xs text-muted-foreground">{user?.email}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Upgrade button for non-premium users */}
+          {!isPremium && (!isCollapsed || isMobile) && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={upgradeToPremium}
+              disabled={isLoading}
+              className="w-full"
+            >
+              {isLoading ? "Loading..." : "Upgrade to Premium"}
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+} 

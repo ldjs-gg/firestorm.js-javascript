@@ -14,7 +14,7 @@ import { initFirebase } from "../../../firebase";
 import { getAuth } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getPremiumStatus } from "@/app/(application)/account/_functions/getPremiumStatus";
+import { getPremiumStatus } from "../account/_functions/getPremiumStatus";
 
 /**
  * Premium Feature A Page Component

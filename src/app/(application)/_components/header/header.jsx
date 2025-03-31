@@ -20,7 +20,7 @@ import FilterButton from "./_components/filter-button";
 import ComponentButton from "./_components/component-button";
 import Tooltip from "./_components/tooltip";
 import { useRouter } from "next/navigation";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggle } from "../../../../components/theme-toggle";
 import { Button } from "../../../../components/ui/button";
 
 /**
@@ -139,4 +139,4 @@ export default function Header({ isMobileMenuOpen, setIsMobileMenuOpen }) {
       </div>
     </div>
   );
-} 
+}

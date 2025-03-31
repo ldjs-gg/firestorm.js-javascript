@@ -16,7 +16,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "../../../../../components/ui/dropdown-menu";
 import { initFirebase } from "../../../../../firebase";
 import { getAuth } from "firebase/auth";
 import Image from "next/image";

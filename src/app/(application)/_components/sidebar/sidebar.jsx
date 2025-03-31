@@ -18,13 +18,13 @@ import Image from "next/image";
 import { initFirebase } from "../../../../firebase";
 import { getAuth } from "firebase/auth";
 import { useEffect, useState } from "react";
-import { getPremiumStatus } from "@/app/(application)/account/_functions/getPremiumStatus";
-import { getCheckoutUrl } from "@/app/(application)/account/_functions/stripePayment";
+import { getPremiumStatus } from "../../account/_functions/getPremiumStatus";
+import { getCheckoutUrl } from "../../account/_functions/stripePayment";
 import { Button } from "../../../../components/ui/button";
 import Tooltip from "./_components/tooltip";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { SidebarThemeToggle } from "@/components/sidebar-theme-toggle";
+import { SidebarThemeToggle } from "../../../../components/sidebar-theme-toggle";
 
 /**
  * Sidebar Component
@@ -246,7 +246,7 @@ export default function Sidebar({ onCollapse, isMobileMenuOpen, onCloseMobileMen
                   }
                 }
               }}>
-                <Image src="/icons/analytics.svg" alt="Analytics Icon" width={20} height={20} className="dark:invert" />
+                <Image src="/icons/cloud.svg" alt="Cloud Icon" width={20} height={20} className="dark:invert" />
               </div>
             </Tooltip>
           ) : (
@@ -258,53 +258,101 @@ export default function Sidebar({ onCollapse, isMobileMenuOpen, onCloseMobileMen
                 }
               }
             }}>
-              <Image src="/icons/analytics.svg" alt="Analytics Icon" width={20} height={20} className="dark:invert" />
+              <Image src="/icons/cloud.svg" alt="Cloud Icon" width={20} height={20} className="dark:invert" />
               <p className="text-xs">Premium Feature</p>
             </div>
           )}
         </div>
+      </div>
 
-        {/* Bottom section with theme toggle and user profile */}
-        <div className="mt-auto flex flex-col gap-4">
-          <div className="w-[calc(100%+32px)] border-t border-border -ml-4"></div>
-          
-          {/* Theme toggle */}
-          <div className="flex items-center gap-2">
-            <SidebarThemeToggle />
-            {(!isCollapsed || isMobile) && <p className="text-xs">Theme</p>}
+      {/* Bottom section with upgrade button and user profile */}
+      <div className="mt-auto">
+        {/* Upgrade Button - Shown only for non-premium users and when sidebar is expanded */}
+        {!isPremium && (!isCollapsed || isMobile) && (
+          <div className="mb-4 px-4">
+            <Button 
+              onClick={upgradeToPremium} 
+              disabled={isLoading}
+              className="w-full bg-black hover:bg-gray-800 text-white text-xs cursor-pointer"
+            >
+              {isLoading ? "Loading..." : "Upgrade your plan"}
+            </Button>
           </div>
+        )}
 
-          {/* User profile section */}
-          <div className="flex items-center gap-2">
-            <div className="relative w-8 h-8 rounded-full overflow-hidden">
-              <Image 
-                src={user?.photoURL || "/images/default-avatar.png"} 
-                alt="User Avatar" 
-                fill 
+        {/* User Profile Card */}
+        <div className="w-full border-t border-border"></div>
+        <div onClick={() => {
+          router.push("/account");
+          if (isMobile && isMobileMenuOpen) {
+            onCloseMobileMenu?.();
+          }
+        }} className="p-4">
+          <div className={`flex items-center ${isCollapsed && !isMobile ? 'justify-center' : ''} gap-3 p-2 hover:bg-accent rounded-md cursor-pointer`}>
+            <div className="relative flex-shrink-0 w-8 h-8 rounded-full overflow-hidden">
+              <Image
+                src={user?.photoURL || "/default-avatar.png"}
+                alt="User Profile"
+                fill
                 className="object-cover"
               />
             </div>
             {(!isCollapsed || isMobile) && (
-              <div className="flex flex-col">
-                <p className="text-xs font-medium">{user?.displayName}</p>
-                <p className="text-xs text-muted-foreground">{user?.email}</p>
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-1">
+                  <p className="text-sm font-medium truncate text-foreground">{user?.displayName || "User"}</p>
+                  {isPremium && (
+                    <Tooltip text="Premium Plan">
+                      <span className="text-yellow-500 text-xs flex items-center -m-[2px] mx-[1px]">★</span>
+                    </Tooltip>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground truncate mt-0.5">{user?.email}</p>
               </div>
             )}
           </div>
-
-          {/* Upgrade button for non-premium users */}
-          {!isPremium && (!isCollapsed || isMobile) && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={upgradeToPremium}
-              disabled={isLoading}
-              className="w-full"
-            >
-              {isLoading ? "Loading..." : "Upgrade to Premium"}
-            </Button>
-          )}
         </div>
+
+        {/* Mobile Settings and Logout */}
+        {isMobile && (
+          <>
+            <div className="w-full border-t border-border"></div>
+            <div className="p-4">
+              <div 
+                onClick={() => {
+                  router.push('/settings');
+                  if (isMobile && isMobileMenuOpen) {
+                    onCloseMobileMenu?.();
+                  }
+                }} 
+                className="flex items-center gap-3 p-2 hover:bg-accent rounded-md cursor-pointer"
+              >
+                <Image src="/icons/settings.svg" alt="Settings Icon" width={20} height={20} className="dark:invert" />
+                <p className="text-sm text-foreground">Settings</p>
+              </div>
+              <div 
+                onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+                className="flex items-center gap-3 p-2 hover:bg-accent rounded-md cursor-pointer"
+              >
+                <SidebarThemeToggle />
+                <p className="text-sm text-foreground">Theme</p>
+              </div>
+              <div 
+                onClick={() => {
+                  auth.signOut();
+                  router.push("/");
+                  if (isMobile && isMobileMenuOpen) {
+                    onCloseMobileMenu?.();
+                  }
+                }} 
+                className="flex items-center gap-3 p-2 hover:bg-accent rounded-md cursor-pointer"
+              >
+                <Image src="/icons/logout.svg" alt="Logout Icon" width={20} height={20} className="dark:invert" />
+                <p className="text-sm text-foreground">Logout</p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

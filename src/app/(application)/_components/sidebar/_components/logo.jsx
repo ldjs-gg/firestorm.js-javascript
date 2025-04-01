@@ -31,7 +31,7 @@ export default function Logo({ isCollapsed }) {
       >
         <div className="w-8 h-8 relative flex-shrink-0">
           <Image 
-            src="/firestorm_logo.svg" 
+            src="/firestorm-logo.svg" 
             alt="Firestorm.js" 
             fill
             className="object-contain"
